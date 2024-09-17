@@ -40,6 +40,19 @@ class PysparkSessionManager:
     @classmethod
     def _start_session_local(cls, app_name: Optional[str], config: Optional[dict],
                              enable_hive_support: bool) -> SparkSession:
+        """
+
+        :param app_name:
+        :param config:
+        :param enable_hive_support:
+        :return:
+        """
+        """
+        builder = SparkSession.builder.appName("")
+        builder  = builder.config("","").config("","").config("","")
+        
+        spark_session = builder.getorCreate()
+        """
         builder = SparkSession.builder.appName(app_name)
         if enable_hive_support:
             builder = builder.enableHiveSupport()

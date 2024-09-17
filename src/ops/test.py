@@ -41,9 +41,9 @@ def generate_args_code(entry_points_config):
     return parser.parse_args()
 
 
-def get_spark_session(config, platform):
+def get_spark_session(entry_point_name,config,platform):
     """Initialize and return a Spark session."""
-    return PysparkSessionManager.start_session(config=config, platform=platform)
+    return PysparkSessionManager.start_session(app_name=entry_point_name,config=config, platform=platform)
 
 
 def get_data_sources_dfs(spark, platform, entry_point_config):
@@ -91,7 +91,7 @@ def execute_post_sql_transformations(spark, sql_transformation_configs):
     return transformation_df_dict
 
 
-def handle_entry_point(entry_point_config, config, input_parameters):
+def handle_entry_point(entry_point_name, entry_point_config, config, input_parameters):
     """Handle the logic to execute the appropriate function based on the entry point type."""
     entry_point_type = entry_point_config.get('type')
 
@@ -109,7 +109,7 @@ def handle_entry_point(entry_point_config, config, input_parameters):
         platform = config.get('platform')
 
         # Start Spark session
-        spark = get_spark_session(spark_config, platform)
+        spark = get_spark_session(entry_point_name,spark_config,platform)
 
         # Get input dataframes from sources
         input_df_dict = get_data_sources_dfs(spark, platform, entry_point_config)
@@ -160,7 +160,7 @@ def execute_df_specs(spark, df_dict, config):
 
 def main():
     """Main entry point of the script."""
-    entry_point = 'staging_bronze_loan_approval'  # Define the entry point for the processing
+    entry_point = 'administration_jdbc_organizations_bronze_task'  # Define the entry point for the processing
 
     # Load configuration from the specified path
     #config_path = pkg_resources.resource_filename('mlops_databricks_test', 'configs/dev.yaml')
@@ -180,7 +180,7 @@ def main():
         input_parameters = generate_args_code(entry_point_config)
 
     # Handle the entry point logic based on its type
-    handle_entry_point(entry_point_config, config, input_parameters)
+    handle_entry_point(entry_point,entry_point_config, config, input_parameters)
 
 
 if __name__ == '__main__':
