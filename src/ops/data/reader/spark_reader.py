@@ -30,6 +30,19 @@ class SparkReader(DataReader):
         Loads data from the input path using the built Spark DataFrame.
         Optionally standardizes schema for XML data (converting to lowercase and replacing underscores).
         """
+        """
+        --------------------------------------------------
+            spark_formt = spark
+            .read
+            .format()
+            
+            .options()
+            .load()
+        --------------------------------------------------
+        df = spark.sql("<query>")
+        -------------------------------------------------
+        
+        """
         options = self.config.get('dataframe_options')  # Get options dictionary from config
         schema = self.config.get('schema')  # Get schema definition from config (if provided)
         input_path = self.config.get('path')  # Get input path from config
@@ -58,7 +71,7 @@ class SparkReader(DataReader):
             self.df = format_with_options_schema.load(input_path)
 
             # Apply schema standardization for XML data (optional)
-            self.df = self.standardized_schema(self.df) if file_format == "xml" else self.df
+            #self.df = self.standardized_schema(self.df) if file_format == "xml" else self.df
             if tmp_view_name:
                 self.df.createOrReplaceTempView(tmp_view_name)
         return self

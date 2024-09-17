@@ -38,18 +38,18 @@ class InputDataFrameManager:
         6. Returns `self` to allow method chaining.
         """
 
-        data_sources = self.config.get("data_sources")  # Extract data sources
+        data_sources_configs = self.config.get("data_sources")  # Extract data sources
         # using Jinja2 syntax
         dataframe_dict = {}  # Create a dictionary to store source name and DataFrame
-        for data_source in data_sources:
-            data_source = dict(data_source)  # Convert data source to a regular dictionary
+        for data_source_config in data_sources_configs:
+            data_source_config = dict(data_source_config)  # Convert data source to a regular dictionary
 
-            dataframe_type = data_source.get('dataframe_type')
-            source_name = data_source.get('source_name')
+            dataframe_type = data_source_config.get('dataframe_type')
+            source_name = data_source_config.get('source_name')
             if dataframe_type == 'pandas':
-                dataframe_dict[source_name] = PandasReader(data_source).read_data().get_dataframe()
+                dataframe_dict[source_name] = PandasReader(data_source_config).read_data().get_dataframe()
             elif dataframe_type == 'spark':
-                dataframe_dict[source_name] = SparkReader(self.spark, self.platform,data_source).read_data().get_dataframe()
+                dataframe_dict[source_name] = SparkReader(self.spark, self.platform,data_source_config).read_data().get_dataframe()
             else:
                 raise ValueError(f"Unsupported dataframe_type: {dataframe_type}")  # Handle unsupported types
 

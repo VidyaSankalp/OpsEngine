@@ -41,9 +41,9 @@ def generate_args_code(entry_points_config):
     return parser.parse_args()
 
 
-def get_spark_session(entry_point_name,config,platform):
+def get_spark_session(entry_point_name, config, platform):
     """Initialize and return a Spark session."""
-    return PysparkSessionManager.start_session(app_name=entry_point_name,config=config, platform=platform)
+    return PysparkSessionManager.start_session(app_name=entry_point_name, config=config, platform=platform)
 
 
 def get_data_sources_dfs(spark, platform, entry_point_config):
@@ -51,7 +51,7 @@ def get_data_sources_dfs(spark, platform, entry_point_config):
     return InputDataFrameManager(spark, platform, entry_point_config).create_dataframes().get_dataframes()
 
 
-def load_and_execute_function(entry_point_config, input_df_list, config):
+def load_and_execute_function(entry_point_config, input_df_dict_list, config):
     """Load a function dynamically from a module and execute it."""
     transformations_config = entry_point_config.get('transformations')
     function_path = transformations_config.get("entry_point_function_path")
@@ -63,7 +63,7 @@ def load_and_execute_function(entry_point_config, input_df_list, config):
     function = getattr(module, function_name)
 
     # Execute the function with the input dataframes and configuration
-    return function(input_df_list, config)
+    return function(input_df_dict_list, config)
 
 
 def write_data_to_sinks(spark, output_df_dict, entry_point_config):
@@ -109,7 +109,7 @@ def handle_entry_point(entry_point_name, entry_point_config, config, input_param
         platform = config.get('platform')
 
         # Start Spark session
-        spark = get_spark_session(entry_point_name,spark_config,platform)
+        spark = get_spark_session(entry_point_name, spark_config, platform)
 
         # Get input dataframes from sources
         input_df_dict = get_data_sources_dfs(spark, platform, entry_point_config)
@@ -126,7 +126,7 @@ def handle_entry_point(entry_point_name, entry_point_config, config, input_param
 
         # Execute main function (if any)
         if transformations:
-            transformed_df_dict = load_and_execute_function(entry_point_config, pre_sql_transformation_dfs, config)
+            transformed_df_dict = load_and_execute_function(entry_point_config, input_df_dict, config)
 
         # Combine main function output with pre-SQL transformations
         transformed_df_dict = {**transformed_df_dict, **pre_sql_transformation_dfs}
@@ -163,8 +163,9 @@ def main():
     entry_point = 'administration_jdbc_organizations_bronze_task'  # Define the entry point for the processing
 
     # Load configuration from the specified path
-    #config_path = pkg_resources.resource_filename('mlops_databricks_test', 'configs/dev.yaml')
-    config_manager = ConfigurationManager("C:/MultiCloud/project/administation/src/mlops_databricks_test/configs/dev.yaml")
+    # config_path = pkg_resources.resource_filename('mlops_databricks_test', 'configs/dev.yaml')
+    config_manager = ConfigurationManager(
+        "C:/MultiCloud/project/administation/src/mlops_databricks_test/configs/dev.yaml")
     config = config_manager.get_config_as_json()
 
     # Get the configuration specific to the entry point
@@ -180,7 +181,7 @@ def main():
         input_parameters = generate_args_code(entry_point_config)
 
     # Handle the entry point logic based on its type
-    handle_entry_point(entry_point,entry_point_config, config, input_parameters)
+    handle_entry_point(entry_point, entry_point_config, config, input_parameters)
 
 
 if __name__ == '__main__':
